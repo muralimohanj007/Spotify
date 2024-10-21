@@ -7,36 +7,7 @@ Project Category: Advanced
 ## Overview
 This project involves analyzing a Spotify dataset with various attributes about tracks, albums, and artists using **SQL**. It covers an end-to-end process of normalizing a denormalized dataset, performing SQL queries of varying complexity (easy, medium, and advanced), and optimizing query performance. The primary goals of the project are to practice advanced SQL skills and generate valuable insights from the dataset.
 
-```sql
--- create table
-DROP TABLE IF EXISTS spotify;
-CREATE TABLE spotify (
-    artist VARCHAR(255),
-    track VARCHAR(255),
-    album VARCHAR(255),
-    album_type VARCHAR(50),
-    danceability FLOAT,
-    energy FLOAT,
-    loudness FLOAT,
-    speechiness FLOAT,
-    acousticness FLOAT,
-    instrumentalness FLOAT,
-    liveness FLOAT,
-    valence FLOAT,
-    tempo FLOAT,
-    duration_min FLOAT,
-    title VARCHAR(255),
-    channel VARCHAR(255),
-    views FLOAT,
-    likes BIGINT,
-    comments BIGINT,
-    licensed BOOLEAN,
-    official_video BOOLEAN,
-    stream BIGINT,
-    energy_liveness FLOAT,
-    most_played_on VARCHAR(50)
-);
-```
+
 ## Project Steps
 
 ### 1. Data Exploration
@@ -93,10 +64,37 @@ group by 1;
 
 ### Medium Level
 1. Calculate the average danceability of tracks in each album.
+```
+select album , avg(danceability) as avg_dance
+from spotify_dataset 
+group by 1 order by 2 desc;
+```
 2. Find the top 5 tracks with the highest energy values.
+```
+select track, max(energy) as highest_energy
+from spotify_dataset group by 1 order by 2 desc limit 5;
+```
 3. List all tracks along with their views and likes where `official_video = TRUE`.
+```
+select track as Song, sum(likes) as Total_likes, sum(views) as Total_views 
+from spotify_dataset 
+where official_video = "True" group by 1;
+```
 4. For each album, calculate the total views of all associated tracks.
+```
+select Album,Track ,sum(views) as Totalviews
+from spotify_dataset 
+group by 1,2 order by 3 desc;
+```
 5. Retrieve the track names that have been streamed on Spotify more than YouTube.
+```
+select * from(
+	select track ,
+	coalesce(sum(case when most_playedon ="youtube" then  stream end),0) as "mostplayedon_youtube",
+	coalesce(sum(case when most_playedon ="spotify" then  stream end),0) as "mostplayedon_spotify"
+	from spotify_dataset group by 1) as t1
+WHERE mostplayedon_spotify > mostplayedon_youtube AND mostplayedon_youtube <> 0;
+```
 
 ### Advanced Level
 1. Find the top 3 most-viewed tracks for each artist using window functions.
